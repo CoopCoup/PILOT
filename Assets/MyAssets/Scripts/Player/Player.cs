@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
     [Space]
     [SerializeField] private CameraSpring cameraSpring;
     [SerializeField] private CameraLean cameraLean;
+    [Space] 
+    [SerializeField] private WeaponHolder weaponHolder;
 
     private PlayerInputActions _inputActions;
 
@@ -27,6 +29,8 @@ public class Player : MonoBehaviour
 
         cameraSpring.Initialise();
         cameraLean.Initialise();
+
+        weaponHolder.Initialise();
     }
 
     private void OnDestroy()
@@ -42,6 +46,15 @@ public class Player : MonoBehaviour
         // Get camera input and update its rotation
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
         playerCamera.UpdateRotation(cameraInput);
+
+        // Get action input and update the weapon holder
+        var actionInput = new ActionInput
+        {
+            Action = input.Action,
+            Ready = input.Ready.IsPressed(),
+        };
+        weaponHolder.UpdateInput(actionInput);
+        weaponHolder.UpdateWeaponHolder(deltaTime);
 
         // Get character input and update it
         var characterInput = new CharacterInput

@@ -94,6 +94,11 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     private float _timeSinceJumpRequest;
     private bool _ungroundedDueToJump;
 
+    // When the player starts revving the engine, the player input is updated with its power.
+    // We then use this power value to apply force to the player character
+    private bool _engineRevved;
+    private float _EnginePower;
+
     private Collider[] _uncrouchOverlapResults; 
 
     public void Initialise()
