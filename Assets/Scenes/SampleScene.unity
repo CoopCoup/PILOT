@@ -463,6 +463,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 411545975}
+  - component: {fileID: 411545976}
+  - component: {fileID: 411545977}
   m_Layer: 0
   m_Name: EngineHolder
   m_TagString: Untagged
@@ -486,6 +488,40 @@ Transform:
   - {fileID: 555545743}
   m_Father: {fileID: 1835163834}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &411545976
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411545974}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 189c5967b619bce43826fb01b3b95189, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &411545977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411545974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44e21691549a2a34f9605702daf32822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &473768182
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -767,6 +803,11 @@ MonoBehaviour:
   slopeJumpKickOffScale: 0.8
   jumpSustainGravity: 0.426
   airJumps: 1
+  maxZoomSpeed: 20
+  zoomAcceleration: 5
+  ChargeSpeed: 15
+  MaxChargeTime: 1.5
+  StoppedTime: 1
   standHeight: 2
   crouchHeight: 1
   crouchHeightResponse: 13
@@ -901,6 +942,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensitivity: 0.1
+  zoomSensitivity: 0.001
+  turnSpeed: 70
+  maxTurn: 120
+  turnInputDamping: 1
+  maxRoll: 70
+  rollAmount: 1
+  rollSpeed: 2
 --- !u!1 &1099181157
 GameObject:
   m_ObjectHideFlags: 0
@@ -1386,14 +1434,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   engineRevver: {fileID: 555545744}
   engineHolder: {fileID: 411545974}
-  engineIdlePos: {x: 0.5, y: -0.5, z: -0.5}
-  engineEquipPos: {x: 0, y: -0.43, z: 0.6}
-  engineIdleRotEuler: {x: 124, y: -86, z: -84}
-  engineEquipRotEuler: {x: -9, y: 0, z: 0}
-  engineDrawSpeed: 10
-  engineStowSpeed: 3
-  engineDrawRotationSpeed: 5
-  engineRevStartThreshold: 0.03
 --- !u!1 &1902363590
 GameObject:
   m_ObjectHideFlags: 0

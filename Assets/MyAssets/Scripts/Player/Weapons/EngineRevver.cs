@@ -4,15 +4,13 @@ using UnityEngine;
 public class EngineRevver : MonoBehaviour
 {
 
-    public static event Action<float> OnEngineStart;
-    public static event Action OnEngineStop;
+    public static event Action OnEngineStart;
     
     [Header("Revving")]
     [SerializeField] private GameObject RipCord;
-    [Tooltip("The time it takes for the engine to rev up to maximum power")]
-    [SerializeField] private float RevUpSpeed = 15f;
 
-    private Animator _animator;
+    private Animator animator;
+    public float engineForce = 0f;
 
     public void MoveEngine(Vector3 pos)
     {
@@ -27,31 +25,32 @@ public class EngineRevver : MonoBehaviour
     public void Initialise()
     {
         // Set the rip chord and the propellers to their start positions and rotations
-        _animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
 
     }
 
-    // Start the rev up animation, which in turn will trigger OnEngineStart once the rip cord is fully pulled 
+    // Start the rev up animation, which in turn will trigger StartEngine once the rip cord is fully extended in the animation
     public void RevEngine()
     {
-        _animator.SetBool("RequestedRev", true);
+        animator.Play("EngineRev", 0);
     }
 
-    // Invoke OnEngineStart, start the propeller spinning animations (maybe using the revUpSpeed as a scale for the speed of the propellers accelerating to max)
+    // Invoke OnEngineStart, start the propeller spinning animations
     private void StartEngine()
     {
-        _animator.SetBool("EngineStarted", true);
-        OnEngineStart?.Invoke(RevUpSpeed);
+        animator.SetBool("EngineStarted", true);
+        OnEngineStart?.Invoke();
     }
 
     public void StopEngine()
     {
-        _animator.SetBool("EngineStarted", false);
+        animator.SetBool("EngineStarted", false);
+        engineForce = 0f;
     }
 
     public bool IsEngineRevving()
     {
-        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("EngineRev"))
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("EngineRev"))
         {
             return true;
         }

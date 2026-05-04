@@ -31,6 +31,7 @@ public class Player : MonoBehaviour
         cameraLean.Initialise();
 
         weaponHolder.Initialise();
+
     }
 
     private void OnDestroy()
@@ -43,29 +44,40 @@ public class Player : MonoBehaviour
         var input = _inputActions.Gameplay;
         var deltaTime = Time.deltaTime;
 
-        // Get camera input and update its rotation
-        var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
-        playerCamera.UpdateRotation(cameraInput);
+        
 
         // Get action input and update the weapon holder
         var actionInput = new ActionInput
         {
-            Action = input.Action,
-            Ready = input.Ready.IsPressed(),
+            // Right Click draws the engine
+            //Left click revs the engine
+            Action = input.Action.WasPressedThisFrame(),
+            ActionSustained = input.Action.IsPressed(),
+            Ready = input.Ready.IsPressed()
+                ? ReadyInputs.Ready
+                : ReadyInputs.Unready,
         };
         weaponHolder.UpdateInput(actionInput);
         weaponHolder.UpdateWeaponHolder(deltaTime);
+        var zoomInput = weaponHolder.GetEngineRevving();
+
+        // Get camera input and update its rotation
+        var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
+        var moveInput = input.Move.ReadValue<Vector2>();
+        playerCamera.UpdateRotation(cameraInput, moveInput, zoomInput, deltaTime);
 
         // Get character input and update it
         var characterInput = new CharacterInput
         {
             Rotation = playerCamera.transform.rotation,
-            Move = input.Move.ReadValue<Vector2>(),
+            Move = moveInput,
             Jump = input.Jump.WasPressedThisFrame(),
             JumpSustain = input.Jump.IsPressed(),
             Crouch = input.Crouch.IsPressed()
                 ? CrouchInput.Crouch
-                : CrouchInput.Uncrouch
+                : CrouchInput.Uncrouch,
+            Zoom = zoomInput,
+            ZoomForce = weaponHolder.GetEngineForce(),
         };
         playerCharacter.UpdateInput(characterInput);
         playerCharacter.UpdateBody(deltaTime);

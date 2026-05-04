@@ -24,7 +24,7 @@ public class CameraLean : MonoBehaviour
 
     public void UpdateLean(float deltaTime, Vector3 acceleration, Vector3 up)
     {
-        var planarAcceleration = Vector3.ProjectOnPlane(acceleration, up);
+       /* var planarAcceleration = Vector3.ProjectOnPlane(acceleration, up);
         var damping = planarAcceleration.magnitude > _dampedAcceleration.magnitude
             ? addToDamping 
             : decayDamping;
@@ -48,5 +48,6 @@ public class CameraLean : MonoBehaviour
 
         // Rotate around the lean axis based on the magnitude of the character's acceleration
         transform.rotation = Quaternion.AngleAxis(_dampedAcceleration.magnitude * strength, leanAxis) * transform.rotation;
+       */
     }
 }

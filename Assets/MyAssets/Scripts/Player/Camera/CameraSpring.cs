@@ -28,7 +28,7 @@ public class CameraSpring : MonoBehaviour
 
     public void UpdateSpring(float deltaTime, Vector3 up)
     {
-        transform.localPosition = Vector3.zero;
+        /* transform.localPosition = Vector3.zero;
 
         Spring(ref _springPosition, ref _springVelocity, transform.position, halfLife, frequency, deltaTime);
 
@@ -37,6 +37,7 @@ public class CameraSpring : MonoBehaviour
 
         transform.localEulerAngles = new Vector3(-springHeight * angularDisplacement, 0f, 0f);
         transform.localPosition += relativeSpringPosition * linearDisplacement;
+        */
     }
 
     // https://allenchou.net/2015/04/game-math-more-on-numeric-springing/
