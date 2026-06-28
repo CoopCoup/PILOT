@@ -25,7 +25,6 @@ public class PlayerCamera : MonoBehaviour
 
     // This variable behaves like a joystick with a -1 to 1 range
     private Vector2 lookStick;
-    private float _currentRoll;
 
     public void Initialise(Transform target)
     {
@@ -33,7 +32,7 @@ public class PlayerCamera : MonoBehaviour
         transform.eulerAngles = _eulerAngles = target.eulerAngles;
     }
 
-    public void UpdateRotation(CameraInput mouseInput, Vector2 wasdInput, bool Zooming, float deltaTime)
+    public void UpdateRotation(CameraInput mouseInput, bool Zooming, float deltaTime)
     {
         float yaw;
         float pitch;
@@ -71,21 +70,9 @@ public class PlayerCamera : MonoBehaviour
             lookStick = Vector2.zero;
         }
 
-        // ---- ROLL ----
-        float targetRoll = 0f;
-
-        if (Zooming)
-        {
-            targetRoll = -lookStick.x * maxRoll;
-        }
-
-        // If the player isn't zooming have their camera roll reset faster
-        float newRollSpeed = Zooming ? rollSpeed : rollSpeed * 2f;
-
-        _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, newRollSpeed * deltaTime);
-
         // ---- FINAL ROTATION ----
-        transform.rotation = Quaternion.Euler(_eulerAngles.x, _eulerAngles.y, _currentRoll);
+
+        transform.eulerAngles = _eulerAngles;
 
     }
 
@@ -93,4 +80,6 @@ public class PlayerCamera : MonoBehaviour
     {
         transform.position = target.position;
     }
+
+    public Vector2 GetLookStick => lookStick;
 }

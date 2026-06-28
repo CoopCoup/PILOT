@@ -805,14 +805,16 @@ MonoBehaviour:
   airJumps: 1
   maxZoomSpeed: 20
   zoomAcceleration: 5
+  minBounceDot: 0.3
+  zoomCollisionForce: 10
   ChargeSpeed: 15
   MaxChargeTime: 1.5
   StoppedTime: 1
   standHeight: 2
-  crouchHeight: 1
-  crouchHeightResponse: 13
+  crouchHeight: 0.7
+  crouchHeightResponse: 10
   standCameraTargetHeight: 0.8
-  crouchCameraTargetHeight: 0.7
+  crouchCameraTargetHeight: 0.4
 --- !u!114 &1018872974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -926,7 +928,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1835163834}
-  - {fileID: 1902363591}
+  - {fileID: 1959869491}
   m_Father: {fileID: 1102113110}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1079577157
@@ -944,7 +946,6 @@ MonoBehaviour:
   sensitivity: 0.1
   zoomSensitivity: 0.001
   turnSpeed: 70
-  maxTurn: 120
   turnInputDamping: 1
   maxRoll: 70
   rollAmount: 1
@@ -1434,6 +1435,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   engineRevver: {fileID: 555545744}
   engineHolder: {fileID: 411545974}
+  maxRoll: 60
+  rollSpeed: 2
 --- !u!1 &1902363590
 GameObject:
   m_ObjectHideFlags: 0
@@ -1459,13 +1462,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902363590}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2004980291}
-  m_Father: {fileID: 1079577156}
+  m_Father: {fileID: 1959869491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1902363592
 MonoBehaviour:
@@ -1591,6 +1594,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1959869490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1959869491}
+  m_Layer: 0
+  m_Name: Camera Shake
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1959869491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959869490}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1902363591}
+  m_Father: {fileID: 1079577156}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2004980289
 GameObject:
   m_ObjectHideFlags: 0
@@ -1620,9 +1655,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c257cfb1e82f0e54bb799ec2e3c7abfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addToDamping: 0.5
-  decayDamping: 0.3
-  strength: 0.075
+  maxLean: 1.7
+  leanSpeed: 2
+  maxRoll: 60
+  rollAmount: 1
+  rollSpeed: 2
 --- !u!4 &2004980291
 Transform:
   m_ObjectHideFlags: 0
@@ -1891,6 +1928,10 @@ PrefabInstance:
     - target: {fileID: 4381169086747183238, guid: 9ce794b6d8eadd54aa6f65e96162d6fa, type: 3}
       propertyPath: m_Name
       value: Engine
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381169086747183238, guid: 9ce794b6d8eadd54aa6f65e96162d6fa, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4883926744085164258, guid: 9ce794b6d8eadd54aa6f65e96162d6fa, type: 3}
       propertyPath: RipCordIdlePos.x

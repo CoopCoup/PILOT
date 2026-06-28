@@ -11,13 +11,15 @@ public struct ActionInput
 
 public enum ReadyInputs
 {
-    Ready, Unready
+    None, Toggle
 }
 
 public class WeaponHolder : MonoBehaviour
 {
     [SerializeField] private EngineRevver engineRevver;
     [SerializeField] private GameObject engineHolder;
+    [SerializeField] private float maxRoll = 60f;
+    [SerializeField] private float rollSpeed = 2f;
 
     // Input variables
     private bool _requestedEngineRev;
@@ -27,6 +29,7 @@ public class WeaponHolder : MonoBehaviour
 
     // Engine variables
     private Animator engineHolderAnimator;
+    private float _currentRoll;
 
     public void Initialise()
     {
@@ -44,21 +47,37 @@ public class WeaponHolder : MonoBehaviour
 
         _requestedDraw = input.Ready switch
         {
-            ReadyInputs.Ready => true,
-            ReadyInputs.Unready => false,
+            ReadyInputs.None => _requestedDraw,
+            ReadyInputs.Toggle => !_requestedDraw,
+            // If theres no ready input, keep _requestedDraw to what it already is!
             _ => _requestedDraw,
         };
     }
 
     public void UpdateWeaponHolder(float deltaTime)
     {
-        // If the player is holding the action button, start drawing out the engine
-        // Don't want to do this if the engine is in its revving animation, so maybe hold off on updating this while revving
+        // Tell the animator whether or not the player wants to draw the engine - if true, itll play the animation and draw it, if false it'll holster the engine 
         engineHolderAnimator.SetBool("Draw", _requestedDraw);
         if (engineHolderAnimator.GetBool("CanRev") && _requestedEngineRev)
         {
             engineRevver.RevEngine();
         }
+    }
+
+    public void RollEngine(Vector2 lookStick, float deltaTime)
+    {
+        var targetRoll = -lookStick.x * maxRoll;
+
+        var newRollSpeed = _engineRevving ? rollSpeed : rollSpeed * 2;
+
+        _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, newRollSpeed * deltaTime);
+        var euler = transform.eulerAngles;
+        transform.rotation = Quaternion.Euler(euler.x, euler.y, _currentRoll);
+    }
+
+    public void StowEngine()
+    {
+        _requestedDraw = false;
     }
 
     private void StowedEngine()

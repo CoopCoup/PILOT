@@ -10,6 +10,7 @@ public enum CharacterState
 {
     Default,
     Zooming,
+    Bouncing,
 }
 
 public enum CrouchInput
@@ -76,6 +77,8 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     [Header("Zooming")]
     [SerializeField] private float maxZoomSpeed = 35f;
     [SerializeField] private float zoomAcceleration = 0.5f;
+    [SerializeField] private float minBounceDot = 0.5f;
+    [SerializeField] private float zoomCollisionForce = 16f;
 
     [SerializeField] private float ChargeSpeed = 15f;
     [SerializeField] private float MaxChargeTime = 1.5f;
@@ -93,9 +96,11 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     [Range(0f, 1f)]
     [SerializeField] private float crouchCameraTargetHeight = 0.7f;
 
-    public CharacterState CurrentCharacterState { get; private set; }
+    public CharacterState _currentState { get; private set; }
 
     private Vector3 _acceleration;
+    private Vector3 _velocity;
+    private Vector3 _localVelocity;
 
     private Stance _stance;
 
@@ -111,25 +116,9 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     private float _timeSinceJumpRequest;
     private bool _ungroundedDueToJump;
 
-    private Vector3 _currentChargeVelocity;
-    private bool _isStopped;
-    private bool _mustStopVelocity = false;
-    private float _timeSinceStartedCharge = 0;
-    private float _timeSinceStopped = 0;
-
-    private float _zoomSpeed = 0f;
-    private float _zoomForcePercent;
-
-
-    // --------------- ENGINE SUMMARY ------------------------
-    // 1. When the player revs the engine, the engine's force goes from 0-1 as the propellers whir up to their full speeds. 
-    // 2. The player class receives the input to zoom as well as the engine froce from the weapon holder class.
-    // 3. We get the character's current velocity when they enter the zoom state. This will be the _startZoomSpeed. 
-    // 4. At THE MOMENT if the start velocity is higher than the max zoom velocity then we just hold velocity there.
-    // 5. IN THE FUTURE we could have a Limit Break Max Speed, for when the player enters the zoom state whilst they're moving faster than Max Zoom Speed. 
-    // We would calculate our Limit Break Max Speed by adding a Limit Break Allowance scalar value onto our current speed,
-    // acclerate up to that so the player still feels acceleration from zooming, then start dampening their speed until its reduced down to the Max Zoom Speed. 
-
+    private float _zoomForce;
+    private Vector3 _internalVelocityAdd = Vector3.zero;
+    private bool _stopBeforeAddVelocity = false;
 
     private Collider[] _uncrouchOverlapResults; 
 
@@ -146,9 +135,9 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
     public void TransitionToState(CharacterState newState)
     {
-        CharacterState tempInitialState = CurrentCharacterState;
+        CharacterState tempInitialState = _currentState;
         OnStateExit(tempInitialState, newState);
-        CurrentCharacterState = newState;
+        _currentState = newState;
         OnStateEnter(newState, tempInitialState);
     }
 
@@ -162,7 +151,6 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
-                    _zoomSpeed = 0f;
                     break;
                 }
         }
@@ -184,13 +172,26 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
        
         if (input.Zoom)
         {
-            _zoomForcePercent = input.ZoomForce;
-            TransitionToState(CharacterState.Zooming);
+            switch (_currentState)
+            {
+                case CharacterState.Default:
+                    _zoomForce = input.ZoomForce;
+                    TransitionToState(CharacterState.Zooming);
+                    break;
+
+                case CharacterState.Zooming:
+                    _zoomForce = input.ZoomForce;
+                    break;
+
+                case CharacterState.Bouncing:
+                    break;
+            }
+
         }
         
         _requestedRotation = input.Rotation;
 
-        switch (CurrentCharacterState)
+        switch (_currentState)
         {
             case CharacterState.Default:
                 {
@@ -221,15 +222,19 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
+
                     if (!input.Zoom)
                     {
                         TransitionToState(CharacterState.Default);
                     }
                     break;
                 }
+            case CharacterState.Bouncing:
+                {
+                   
+                    break;
+                }
         }
-
-        
     }
 
     
@@ -238,7 +243,8 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
     public void BeforeCharacterUpdate(float deltaTime)
     {
-        switch (CurrentCharacterState)
+
+        switch (_currentState)
         {
             case CharacterState.Default:
                 {
@@ -257,7 +263,24 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
-
+                    _stance = Stance.Crouch;
+                    motor.SetCapsuleDimensions
+                        (
+                            radius: motor.Capsule.radius,
+                            height: crouchHeight,
+                            yOffset: crouchHeight * 0.5f
+                        );
+                    break;
+                }
+            case CharacterState.Bouncing:
+                {
+                    _stance = Stance.Crouch;
+                    motor.SetCapsuleDimensions
+                        (
+                            radius: motor.Capsule.radius,
+                            height: crouchHeight,
+                            yOffset: crouchHeight * 0.5f
+                        );
                     break;
                 }
         }
@@ -271,7 +294,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
         // Update the character's rotation to face in the same direction as the requested rotation (camera rotation)
         // We don't want the character to pitch up and down, so the direction the character looks should be "flattened"
 
-        switch (CurrentCharacterState)
+        switch (_currentState)
         {
             case CharacterState.Default :
                 {
@@ -321,18 +344,53 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
         var rootTargetScale = new Vector3(1f, normalisedHeight, 1f);
 
         //lerp the camera and character capsule root changes in height so crouching is smooth!
-        cameraTarget.localPosition = Vector3.Lerp
-            (
-                a: cameraTarget.localPosition,
-                b: new Vector3(0f, cameraTargetHeight, 0f),
-                t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
-            );
-        root.localScale = Vector3.Lerp
-            (
-                a: root.localScale,
-                b: rootTargetScale,
-                t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
-            );
+        switch (_currentState)
+        {
+            case CharacterState.Default:
+                cameraTarget.localPosition = Vector3.Lerp
+                    (
+                        a: cameraTarget.localPosition,
+                        b: new Vector3(0f, cameraTargetHeight, 0f),
+                        t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
+                    );
+                root.localScale = Vector3.Lerp
+                    (
+                        a: root.localScale,
+                        b: rootTargetScale,
+                        t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
+                    );
+                break;
+
+            case CharacterState.Zooming:
+                cameraTarget.localPosition = Vector3.Lerp
+                    (
+                        a: cameraTarget.localPosition,
+                        b: new Vector3(0f, cameraTargetHeight, 0f),
+                        t: 1f - Mathf.Exp(-_zoomForce * deltaTime)
+                    );
+                root.localScale = Vector3.Lerp
+                    (
+                        a: root.localScale,
+                        b: rootTargetScale,
+                        t: 1f - Mathf.Exp(-_zoomForce * deltaTime)
+                    );
+                break;
+            case CharacterState.Bouncing:
+                cameraTarget.localPosition = Vector3.Lerp
+                 (
+                     a: cameraTarget.localPosition,
+                     b: new Vector3(0f, cameraTargetHeight, 0f),
+                     t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
+                 );
+                root.localScale = Vector3.Lerp
+                    (
+                        a: root.localScale,
+                        b: rootTargetScale,
+                        t: 1f - Mathf.Exp(-crouchHeightResponse * deltaTime)
+                    );
+                break;
+
+        }
     }
 
 
@@ -341,7 +399,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
     {
         
-        switch (CurrentCharacterState)
+        switch (_currentState)
         {
             case CharacterState.Default:
                 {
@@ -546,27 +604,67 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
-                    motor.ForceUnground(time: 0.1f);
+                    //motor.ForceUnground(time: 0.1f);
 
-                    //Increase the player's zoom speed
-                    /*
-                    var zoomDirection = (_requestedRotation * Vector3.forward).normalized;
-                    var zoomVelocity = (Mathf.Lerp(_zoomSpeed, maxZoomSpeed, _zoomForcePercent)) * zoomDirection;
-                    currentVelocity = zoomVelocity;
-                    currentVelocity += gravity * deltaTime;
-                    */
                     var flyingGravity = gravity * 0.5f;
-                    currentVelocity += flyingGravity * deltaTime;
+                    if (!motor.GroundingStatus.IsStableOnGround)
+                    {
+                        currentVelocity += flyingGravity * deltaTime;
+                    }
+
 
                     var zoomDirection = (_requestedRotation * Vector3.forward).normalized;
                     var targetZoomVelocity = maxZoomSpeed * zoomDirection;
-                    var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, 1f - Mathf.Exp(-_zoomForcePercent * deltaTime)); 
+                    var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, 1f - Mathf.Exp(-_zoomForce * deltaTime));
+                    // Max zoom force is 10f
+                    // If the zoom force is high enough, allow it to lift the player off the ground
+                    if (motor.GroundingStatus.IsStableOnGround)
+                    {
+                        motor.ForceUnground(time: 0.1f);
+                    }
                     currentVelocity = newZoomVelocity;
+                    break;
+                }
+            case CharacterState.Bouncing:
+                {
+                    if (motor.GroundingStatus.IsStableOnGround)
+                    {
+                        var targetVelocity = Vector3.zero;
+                        var response = crouchWalkResponse;
+                        var moveVelocity = Vector3.Lerp
+                                (
+                                    a: currentVelocity,
+                                    b: targetVelocity,
+                                    t: 1f - Mathf.Exp(-response * deltaTime)
+                                );
+                        currentVelocity = moveVelocity;
+                    }
+                    else
+                    {
+                        // re-implement the default state air movement limitations here! Maybe that way the player won't fly off
+                        // Gravity
+                        var effectiveGravity = gravity;
+                        currentVelocity += effectiveGravity * deltaTime;
+                    }
+
+
+
+
                     break;
                 }
         }
         
-        
+
+        // Take into account additive velocity
+        if (_internalVelocityAdd.sqrMagnitude > 0f)
+        {
+            motor.ForceUnground();
+            currentVelocity += _internalVelocityAdd;
+            _internalVelocityAdd = Vector3.zero;
+        }
+
+        _velocity = currentVelocity;
+        _localVelocity = transform.InverseTransformDirection(currentVelocity);
     }
 
    
@@ -575,8 +673,8 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
     public void AfterCharacterUpdate(float deltaTime)
     {
-        
-        switch (CurrentCharacterState)
+
+        switch (_currentState)
         {
             case CharacterState.Default:
                 {
@@ -649,7 +747,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
     {
         // This is called when the motor's movement logic detects a hit 
-        switch (CurrentCharacterState)
+        switch (_currentState)
         {
             case CharacterState.Default:
                 {
@@ -657,8 +755,27 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
+                    Vector3 velocityDir = _velocity.normalized;
 
-                    break;
+                    // How much are we moving into the hit surface?
+                    float impactDot = Vector3.Dot(velocityDir, -hitNormal);
+                    impactDot = Mathf.Max(0f, impactDot);
+
+                    float impactForce = impactDot * _velocity.magnitude;
+
+                    if (impactDot > minBounceDot && impactForce > zoomCollisionForce && _zoomForce >= 10)
+                    {
+                        OnBounce();
+                        AddVelocity(-_velocity + (hitNormal * 15f), true);
+
+                    }
+                    else
+                    {
+                        // Minor collision 
+                        Debug.Log("Bump");
+                    }
+
+                        break;
                 }
         }
     }
@@ -678,8 +795,26 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
         // This is called by the motor when it is detecting a collision that did not result from a "movement hit"
     }
 
-   
+    public void AddVelocity(Vector3 velocity, bool stopBeforeAddingVelocity)
+    {
+        _internalVelocityAdd += velocity;
+        _stopBeforeAddVelocity = stopBeforeAddingVelocity;
+    }
+
+    private void OnBounce()
+    {
+        FunctionTimer.Create(StopBouncing, 1.5f, "StopBounceTimer");
+        TransitionToState(CharacterState.Bouncing);
+    }
+
+    private void StopBouncing()
+    {
+        TransitionToState(CharacterState.Default);
+    }
+
     public Transform GetCameraTarget() => cameraTarget;
 
     public Vector3 GetCharacterAcceleration() => _acceleration;
+
+    public Vector3 GetCharacterLocalVelocity() => _localVelocity;
 }
