@@ -42,9 +42,11 @@ public class Player : MonoBehaviour
     [SerializeField] private PlayerCamera playerCamera;
     [Space]
     [SerializeField] private CameraSpring cameraSpring;
+    [SerializeField] private CameraShake cameraShake;
     [SerializeField] private CameraLean cameraLean;
     [Space] 
     [SerializeField] private WeaponHolder weaponHolder;
+    [SerializeField] private WeaponSway weaponSway;
 
     private PlayerInputActions _inputActions;
 
@@ -71,9 +73,10 @@ public class Player : MonoBehaviour
 
         playerCharacter.Initialise();
         playerCamera.Initialise(playerCharacter.GetCameraTarget());
+        cameraSpring.Initialise();
 
         weaponHolder.Initialise();
-
+        weaponSway.Initialise();
     }
 
     private void OnDestroy()
@@ -85,6 +88,11 @@ public class Player : MonoBehaviour
     {
         var input = _inputActions.Gameplay;
         var deltaTime = Time.deltaTime;
+
+        var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
+
+        playerCamera.UpdateRotation(cameraInput, _playerState.EngineOn, deltaTime);
+        weaponSway.UpdateLag(deltaTime, _playerState, playerCamera.LookDelta);
 
         // Get action input and update the weapon holder
         var actionInput = new ActionInput
@@ -136,14 +144,12 @@ public class Player : MonoBehaviour
     {
         var deltaTime = Time.deltaTime;
         var cameraTarget = playerCharacter.GetCameraTarget();
-        var lookStick = playerCamera.GetLookStick;
-        var input = _inputActions.Gameplay;
-        var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
 
-        playerCamera.UpdateRotation(cameraInput, _playerState.EngineOn, deltaTime);
-        playerCamera.UpdatePosition(cameraTarget);   
-        cameraSpring.UpdateSpring(deltaTime, cameraTarget.up);
-        cameraLean.UpdateLean(deltaTime, _playerState, cameraTarget.up, lookStick);
-        weaponHolder.RollEngine(lookStick, deltaTime);
+        playerCamera.UpdatePosition(cameraTarget);
+        //cameraShake.UpdateShake();
+        cameraSpring.UpdateSpring(deltaTime, _playerState, cameraTarget.up);
+        cameraLean.UpdateLean(deltaTime, _playerState, playerCamera.LookStick);
+        weaponHolder.RollEngine(cameraLean.CurrentRoll, deltaTime);
+
     }
 }

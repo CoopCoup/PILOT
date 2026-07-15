@@ -16,28 +16,44 @@ public class CameraSpring : MonoBehaviour
     [Space]
     [Tooltip("How much the spring should affect the camera's position.")]
     [SerializeField] private float linearDisplacement = 0.05f;
+
+    [SerializeField] private float maxSpringStretch = -1f;
+
     private Vector3 _springPosition;
     private Vector3 _springVelocity;
-
+    private float _tempAngularDisplacement;
 
     public void Initialise()
     {
-        _springPosition = transform.position;
-        _springVelocity = Vector3.zero;
+        ResetSpring();
     }
 
-    public void UpdateSpring(float deltaTime, Vector3 up)
+    public void UpdateSpring(float deltaTime, PlayerState playerState, Vector3 up)
     {
-        /* transform.localPosition = Vector3.zero;
+        float upVel;
+        //int targetSpring = 0;
+        upVel = playerState.LocalVelocity.y;
 
-        Spring(ref _springPosition, ref _springVelocity, transform.position, halfLife, frequency, deltaTime);
 
-        var relativeSpringPosition = _springPosition - transform.position;
-        var springHeight = Vector3.Dot(relativeSpringPosition, up);
+        if (playerState.State != CharacterState.Zooming)
+        {
+            transform.localPosition = Vector3.zero;
 
-        transform.localEulerAngles = new Vector3(-springHeight * angularDisplacement, 0f, 0f);
-        transform.localPosition += relativeSpringPosition * linearDisplacement;
-        */
+            Spring(ref _springPosition, ref _springVelocity, transform.position, halfLife, frequency, deltaTime);
+
+            var relativeSpringPosition = _springPosition - transform.position;
+            var springHeight = Vector3.Dot(relativeSpringPosition, up);
+
+            transform.localEulerAngles = new Vector3(-springHeight * angularDisplacement, 0f, 0f);
+            transform.localPosition += relativeSpringPosition * linearDisplacement;
+        }
+        else
+        {
+           ResetSpring();
+        }
+
+
+
     }
 
     // https://allenchou.net/2015/04/game-math-more-on-numeric-springing/
@@ -56,5 +72,11 @@ public class CameraSpring : MonoBehaviour
         var detV = velocity + hoo * (target - current);
         current = detX * detInv;
         velocity = detV * detInv;
+    }
+
+    private void ResetSpring()
+    {
+        _springPosition = transform.position;
+        _springVelocity = Vector3.zero;
     }
 }

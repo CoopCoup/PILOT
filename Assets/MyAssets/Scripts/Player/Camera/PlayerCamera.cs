@@ -16,15 +16,14 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private float turnSpeed = 70f;
     [SerializeField] private float turnInputDamping = 1f;
 
-    [Header("Roll")]
-    [SerializeField] private float maxRoll = 70f;
-    [SerializeField] private float rollAmount = 1f;
-    [SerializeField] private float rollSpeed = 2f;
-
     private Vector3 _eulerAngles;
 
     // This variable behaves like a joystick with a -1 to 1 range
     private Vector2 lookStick;
+    public Vector2 LookStick => lookStick;
+
+    // How much the camera has moved this frame. Used for calculating weapon sway
+    public Vector2 LookDelta { get; private set; }
 
     public void Initialise(Transform target)
     {
@@ -53,6 +52,9 @@ public class PlayerCamera : MonoBehaviour
             yaw = lookStick.x * turnSpeed * deltaTime;
             pitch = -lookStick.y * turnSpeed * deltaTime;
 
+            // We're using the yaw and pitch as the values for how much the 
+            LookDelta = new Vector2(yaw, pitch);
+
             _eulerAngles.x += pitch;
             _eulerAngles.y += yaw;
 
@@ -65,6 +67,9 @@ public class PlayerCamera : MonoBehaviour
             _eulerAngles += new Vector3(-mouseInput.Look.y, mouseInput.Look.x) * sensitivity;
 
             _eulerAngles.x = Mathf.Clamp(_eulerAngles.x, -89f, 89f);
+
+            // Set look delta for how much the player has looked in one frame
+            LookDelta = mouseInput.Look * sensitivity;
 
             // Reset virtual stick when exiting zoom
             lookStick = Vector2.zero;
@@ -82,4 +87,5 @@ public class PlayerCamera : MonoBehaviour
     }
 
     public Vector2 GetLookStick => lookStick;
+
 }

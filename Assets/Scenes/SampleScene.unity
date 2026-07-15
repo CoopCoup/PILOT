@@ -205,6 +205,59 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 169406906}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &325400074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 325400075}
+  - component: {fileID: 325400076}
+  m_Layer: 0
+  m_Name: Weapon Sway
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &325400075
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325400074}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 411545975}
+  m_Father: {fileID: 1835163834}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &325400076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 325400074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cafb87c3d8b3dfe419a07f64e52a05a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxDefaultSway: 0.06
+  swayDamping: 0.01
+  maxSwayRot: 4
+  swayRotDamping: 1
+  maxFlySway: 0.01
+  swaySpeed: 10
+  swayRotSpeed: 3
+  lookSmoothing: 10
 --- !u!1 &356220951
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,13 +533,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 411545974}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 555545743}
-  m_Father: {fileID: 1835163834}
+  m_Father: {fileID: 325400075}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &411545976
 Animator:
@@ -927,7 +980,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1835163834}
   - {fileID: 1959869491}
   m_Father: {fileID: 1102113110}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -947,9 +999,6 @@ MonoBehaviour:
   zoomSensitivity: 0.001
   turnSpeed: 70
   turnInputDamping: 1
-  maxRoll: 70
-  rollAmount: 1
-  rollSpeed: 2
 --- !u!1 &1099181157
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,7 +1057,7 @@ Transform:
   m_GameObject: {fileID: 1102113109}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12, y: 15, z: -31.5}
+  m_LocalPosition: {x: 12, y: 13.195, z: -31.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1031,8 +1080,10 @@ MonoBehaviour:
   playerCharacter: {fileID: 1018872973}
   playerCamera: {fileID: 1079577157}
   cameraSpring: {fileID: 1902363592}
+  cameraShake: {fileID: 0}
   cameraLean: {fileID: 2004980290}
   weaponHolder: {fileID: 1835163835}
+  weaponSway: {fileID: 325400076}
 --- !u!1 &1348757260
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,8 +1469,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 411545975}
-  m_Father: {fileID: 1079577156}
+  - {fileID: 325400075}
+  m_Father: {fileID: 2004980291}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1835163835
 MonoBehaviour:
@@ -1436,7 +1487,7 @@ MonoBehaviour:
   engineRevver: {fileID: 555545744}
   engineHolder: {fileID: 411545974}
   maxRoll: 60
-  rollSpeed: 2
+  rollSpeed: 15
 --- !u!1 &1902363590
 GameObject:
   m_ObjectHideFlags: 0
@@ -1486,6 +1537,7 @@ MonoBehaviour:
   frequency: 14
   angularDisplacement: -2
   linearDisplacement: 0.05
+  maxSpringStretch: -1
 --- !u!1 &1933598304
 GameObject:
   m_ObjectHideFlags: 0
@@ -1603,6 +1655,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1959869491}
+  - component: {fileID: 1959869492}
   m_Layer: 0
   m_Name: Camera Shake
   m_TagString: Untagged
@@ -1626,6 +1679,18 @@ Transform:
   - {fileID: 1902363591}
   m_Father: {fileID: 1079577156}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1959869492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959869490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f4e5fec251ff5b428bb6a5d1603bc6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2004980289
 GameObject:
   m_ObjectHideFlags: 0
@@ -1656,9 +1721,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxLean: 1.7
-  leanSpeed: 2
+  leanSpeed: 5
   maxRoll: 60
-  rollAmount: 1
   rollSpeed: 2
 --- !u!4 &2004980291
 Transform:
@@ -1674,6 +1738,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 356220952}
+  - {fileID: 1835163834}
   m_Father: {fileID: 1902363591}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2033612349

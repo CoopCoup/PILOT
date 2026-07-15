@@ -2,15 +2,18 @@ using UnityEngine;
 
 public class CameraLean : MonoBehaviour
 {
+    [Header ("Leaning while Walking")] 
     [ SerializeField] private float maxLean = 1.6f;
     [SerializeField] private float leanSpeed = .5f;
+    [Header ("Camera Roll while Flying")]
     [ SerializeField] private float maxRoll = 60f;
-    [ SerializeField] private float rollAmount = 1f;
     [ SerializeField] private float rollSpeed = 2f;
 
     private float _currentRoll;
 
-    public void UpdateLean(float deltaTime, PlayerState playerState, Vector3 up, Vector2 lookStick)
+    public float CurrentRoll => _currentRoll;
+
+    public void UpdateLean(float deltaTime, PlayerState playerState, Vector2 lookStick)
     {
 
         Vector3 acceleration = playerState.Acceleration;
@@ -18,7 +21,7 @@ public class CameraLean : MonoBehaviour
         bool zooming = (playerState.State is CharacterState.Zooming);
         
         // ROLL - While the player is flying, roll the camera to simulate a plane turn, using a joystick version of their look input to see how much to roll
-        float targetRoll = 0f;
+        float targetRoll;
 
         if (zooming)
         {
@@ -34,7 +37,6 @@ public class CameraLean : MonoBehaviour
         _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, newRollSpeed * deltaTime);
 
         // Final Rotation
-        var euler = transform.eulerAngles;
-        transform.rotation = Quaternion.Euler(euler.x, euler.y, _currentRoll);
+        transform.localRotation = Quaternion.AngleAxis(_currentRoll, Vector3.forward);
     }
 }

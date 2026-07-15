@@ -64,15 +64,12 @@ public class WeaponHolder : MonoBehaviour
         }
     }
 
-    public void RollEngine(Vector2 lookStick, float deltaTime)
+    public void RollEngine(float cameraRoll, float deltaTime)
     {
-        var targetRoll = -lookStick.x * maxRoll;
-
-        var newRollSpeed = _engineRevving ? rollSpeed : rollSpeed * 2;
-
-        _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, newRollSpeed * deltaTime);
-        var euler = transform.eulerAngles;
-        transform.rotation = Quaternion.Euler(euler.x, euler.y, _currentRoll);
+        //float targetRoll = cameraRoll;
+        //_currentRoll = Mathf.Lerp(_currentRoll, targetRoll, rollSpeed * deltaTime);
+        //transform.localRotation = Quaternion.Euler(0f, 0f, cameraRoll);
+        
     }
 
     public void StowEngine()
