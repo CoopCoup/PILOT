@@ -77,6 +77,8 @@ public class Player : MonoBehaviour
 
         weaponHolder.Initialise();
         weaponSway.Initialise();
+
+        playerCharacter.OnImpact += cameraShake.AddShake;
     }
 
     private void OnDestroy()
@@ -92,7 +94,7 @@ public class Player : MonoBehaviour
         var cameraInput = new CameraInput { Look = input.Look.ReadValue<Vector2>() };
 
         playerCamera.UpdateRotation(cameraInput, _playerState.EngineOn, deltaTime);
-        weaponSway.UpdateLag(deltaTime, _playerState, playerCamera.LookDelta);
+        weaponSway.UpdateSway(deltaTime, _playerState, playerCamera.AngularVelocity);
 
         // Get action input and update the weapon holder
         var actionInput = new ActionInput
@@ -101,7 +103,7 @@ public class Player : MonoBehaviour
             //Left click revs the engine
             Action = input.Action.WasPressedThisFrame(),
             ActionSustained = input.Action.IsPressed(),
-            Ready = input.Ready.WasPressedThisFrame()
+            ReadyEngine = input.ReadyEngine.WasPressedThisFrame()
                     ? ReadyInputs.Toggle
                     : ReadyInputs.None,
         };
@@ -112,7 +114,6 @@ public class Player : MonoBehaviour
         }
         else
         {
-
             weaponHolder.UpdateInput(actionInput);
         }
 
@@ -145,11 +146,11 @@ public class Player : MonoBehaviour
         var deltaTime = Time.deltaTime;
         var cameraTarget = playerCharacter.GetCameraTarget();
 
+
         playerCamera.UpdatePosition(cameraTarget);
-        //cameraShake.UpdateShake();
         cameraSpring.UpdateSpring(deltaTime, _playerState, cameraTarget.up);
         cameraLean.UpdateLean(deltaTime, _playerState, playerCamera.LookStick);
-        weaponHolder.RollEngine(cameraLean.CurrentRoll, deltaTime);
+        cameraShake.UpdateShake(deltaTime);
 
     }
 }

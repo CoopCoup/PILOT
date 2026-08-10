@@ -778,10 +778,21 @@ namespace KinematicCharacterController
             }
 
 #if UNITY_EDITOR
-            if (!Mathf.Approximately(_transform.lossyScale.x, 1f) || !Mathf.Approximately(_transform.lossyScale.y, 1f) || !Mathf.Approximately(_transform.lossyScale.z, 1f))
+            const float tolerance = 1e-4f;
+            Vector3 s = _transform.lossyScale;
+
+            if (Mathf.Abs(s.x - 1f) > tolerance || Mathf.Abs(s.y - 1f) > tolerance || Mathf.Abs(s.y - 1f) > tolerance)
             {
                 Debug.LogError("Character's lossy scale is not (1,1,1). This is not allowed. Make sure the character's transform and all of its parents have a (1,1,1) scale.", this.gameObject);
+                Debug.LogError($"Lossy scale = ({_transform.lossyScale.x:R}, {_transform.lossyScale.y:R}, {_transform.lossyScale.z:R})");
             }
+
+            /* HERE IS THE ORIGINAL DEBUG CODE FOR LOSSY SCALE I CHANGED IT CAUSE IT WAS BEING A PRICK
+            (!Mathf.Approximately(_transform.lossyScale.x, 1f) || !Mathf.Approximately(_transform.lossyScale.y, 1f) || !Mathf.Approximately(_transform.lossyScale.z, 1f))
+            {
+                Debug.LogError("Character's lossy scale is not (1,1,1). This is not allowed. Make sure the character's transform and all of its parents have a (1,1,1) scale.", this.gameObject);
+                Debug.LogError($"Lossy scale = ({_transform.lossyScale.x:R}, {_transform.lossyScale.y:R}, {_transform.lossyScale.z:R})");
+            } */
 #endif
 
             _rigidbodiesPushedThisMove.Clear();

@@ -1,59 +1,52 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WeaponSway : MonoBehaviour
 {
-    [SerializeField] private float maxDefaultSway = 0.06f;
-    [SerializeField] private float swayDamping = 0.01f;
-    [SerializeField] private float maxSwayRot = 4f;
-    [SerializeField] private float swayRotDamping = 4f;
-    [SerializeField] private float maxFlySway = 0.01f;
+    [SerializeField] private float maxHorizontalSway = 0.1f;
+    [SerializeField] private float maxVerticalSway = 0.06f;
     [SerializeField] private float swaySpeed = 1f;
     [SerializeField] private float swayRotSpeed = 10f;
-    [SerializeField] private float lookSmoothing = 10f;
 
-    private Vector3 _swayPos;
-    private Vector3 _swayEulerRot;
-    private Vector3 _smoothLook;
 
+
+    Vector3 _currentSway;
     public void Initialise()
     {
-  
+         //_swayPos = transform.localPosition;
+        //_swayEulerRot = transform.localEulerAngles;
+
+        _currentSway = transform.localPosition;
     }
 
-    public void UpdateLag(float deltaTime, PlayerState state, Vector2 lookDelta)
+    public void UpdateSway(float deltaTime, PlayerState state, Vector2 angular)
     {
+        float maxHorSway;
+        float maxVertSway;
         if (state.State is CharacterState.Zooming)
         {
-            _smoothLook = lookDelta;
+            maxHorSway = maxHorizontalSway * 0.25f;
+            maxVertSway = maxVerticalSway * 0.25f;
         }
         else
         {
-            _smoothLook = Vector3.Lerp(_smoothLook, lookDelta, deltaTime * lookSmoothing);
+            maxHorSway = maxHorizontalSway;
+            maxVertSway = maxVerticalSway;
         }
 
-        SwayPosition();
-        SwayRotation();
+        // Angular is the angular velocity of the player camera - the velocity of the camera this frame.
+        // Angular is a vector2 where x is the rotation around the x axis - pitch - and y is the rotation around the y axis - yaw. 
+        // Therefore we need the y for the horizontal movement and the x for the vertical
+        Vector3 targetPos = new Vector3(-angular.y * maxHorizontalSway, angular.x * maxVerticalSway, 0f);
+        targetPos.x = Mathf.Clamp(targetPos.x, -maxHorSway, maxHorSway);
+        targetPos.y = Mathf.Clamp(targetPos.y, -maxVertSway, maxVertSway);
         
-        transform.localPosition = Vector3.Lerp(transform.localPosition, _swayPos, deltaTime * swaySpeed);
-        transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(_swayEulerRot), deltaTime * swayRotSpeed);
+        _currentSway = Vector3.Lerp(_currentSway, targetPos, 1f - Mathf.Exp(-swaySpeed * deltaTime));
+
+        transform.localPosition = _currentSway;
+        
+
     }
 
-    private void SwayPosition()
-    {
-        Vector3 invertLook = _smoothLook * -swayDamping;
-        invertLook.x = Mathf.Clamp(invertLook.x, -maxDefaultSway, maxDefaultSway);
-        invertLook.y = Mathf.Clamp(invertLook.y, -maxDefaultSway, maxDefaultSway);
-
-        _swayPos = invertLook;
-    }
-
-    private void SwayRotation()
-    {
-        Vector2 invertLook = _smoothLook * -swayRotDamping;
-        invertLook.x = Mathf.Clamp(invertLook.x, -maxSwayRot, maxSwayRot);
-        invertLook.y = Mathf.Clamp(invertLook.y, -maxSwayRot, maxSwayRot);
-
-        _swayEulerRot = new Vector3(invertLook.y, invertLook.x, invertLook.x);
-    }
 
 }

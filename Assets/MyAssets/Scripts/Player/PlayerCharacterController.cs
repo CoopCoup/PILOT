@@ -79,6 +79,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     [SerializeField] private float zoomAcceleration = 0.5f;
     [SerializeField] private float minBounceDot = 0.5f;
     [SerializeField] private float zoomCollisionForce = 16f;
+    [SerializeField] private float crashLandStunLength = 1.5f;
 
     [SerializeField] private float ChargeSpeed = 15f;
     [SerializeField] private float MaxChargeTime = 1.5f;
@@ -95,6 +96,11 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     [Tooltip("The camera height while the player is standing.")]
     [Range(0f, 1f)]
     [SerializeField] private float crouchCameraTargetHeight = 0.7f;
+    [Space]
+    [Header("Movement Effects")]
+    [SerializeField] private CameraShake.CamShake crashCamShake;
+    [Space]
+    [SerializeField] private CameraShake.CamShake bumpCamShake;
 
     public CharacterState _currentState { get; private set; }
 
@@ -120,7 +126,10 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
     private Vector3 _internalVelocityAdd = Vector3.zero;
     private bool _stopBeforeAddVelocity = false;
 
-    private Collider[] _uncrouchOverlapResults; 
+    private Collider[] _uncrouchOverlapResults;
+
+    public event Action<CameraShake.CamShake> OnImpact;
+    private bool _canBump = true;
 
     public void Initialise()
     {
@@ -362,6 +371,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 break;
 
             case CharacterState.Zooming:
+               // If the character is zooming, make them crouch using the force of the engine revving up instead of their typical crouch speed so it isn't jarring
                 cameraTarget.localPosition = Vector3.Lerp
                     (
                         a: cameraTarget.localPosition,
@@ -604,24 +614,23 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
-                    //motor.ForceUnground(time: 0.1f);
+                    // -------------------------------------------- FLYING
+                    
+                    motor.ForceUnground(time: 0.1f);
 
+                    // Set lower gravity while flying
                     var flyingGravity = gravity * 0.5f;
                     if (!motor.GroundingStatus.IsStableOnGround)
                     {
                         currentVelocity += flyingGravity * deltaTime;
                     }
 
-
                     var zoomDirection = (_requestedRotation * Vector3.forward).normalized;
                     var targetZoomVelocity = maxZoomSpeed * zoomDirection;
                     var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, 1f - Mathf.Exp(-_zoomForce * deltaTime));
                     // Max zoom force is 10f
                     // If the zoom force is high enough, allow it to lift the player off the ground
-                    if (motor.GroundingStatus.IsStableOnGround)
-                    {
-                        motor.ForceUnground(time: 0.1f);
-                    }
+                    
                     currentVelocity = newZoomVelocity;
                     break;
                 }
@@ -765,14 +774,16 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
                     if (impactDot > minBounceDot && impactForce > zoomCollisionForce && _zoomForce >= 10)
                     {
-                        OnBounce();
+                        Crash();
                         AddVelocity(-_velocity + (hitNormal * 15f), true);
 
                     }
                     else
                     {
-                        // Minor collision 
-                        Debug.Log("Bump");
+                        if (_canBump)
+                        {
+                            Bump();
+                        }
                     }
 
                         break;
@@ -801,10 +812,21 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
         _stopBeforeAddVelocity = stopBeforeAddingVelocity;
     }
 
-    private void OnBounce()
+    private void Crash()
     {
-        FunctionTimer.Create(StopBouncing, 1.5f, "StopBounceTimer");
+        OnImpact?.Invoke(crashCamShake);
+        FunctionTimer.Create(StopBouncing, crashLandStunLength, "StopBounceTimer");
         TransitionToState(CharacterState.Bouncing);
+    }
+
+    private void Bump()
+    {
+        OnImpact?.Invoke(bumpCamShake);
+    }
+
+    private void ResetBump()
+    {
+        _canBump = true;
     }
 
     private void StopBouncing()

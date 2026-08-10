@@ -7,7 +7,7 @@ public class EngineHolder : MonoBehaviour
     public static event Action OnEngineStow;
     public void Initialise()
     {
-        animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>(); 
     }
 
     private void EnableRevving()

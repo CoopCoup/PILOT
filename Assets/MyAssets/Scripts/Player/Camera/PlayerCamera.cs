@@ -23,7 +23,8 @@ public class PlayerCamera : MonoBehaviour
     public Vector2 LookStick => lookStick;
 
     // How much the camera has moved this frame. Used for calculating weapon sway
-    public Vector2 LookDelta { get; private set; }
+    private Vector2 _lastEulerAngles;
+    public Vector2 AngularVelocity { get; private set; }
 
     public void Initialise(Transform target)
     {
@@ -52,9 +53,6 @@ public class PlayerCamera : MonoBehaviour
             yaw = lookStick.x * turnSpeed * deltaTime;
             pitch = -lookStick.y * turnSpeed * deltaTime;
 
-            // We're using the yaw and pitch as the values for how much the 
-            LookDelta = new Vector2(yaw, pitch);
-
             _eulerAngles.x += pitch;
             _eulerAngles.y += yaw;
 
@@ -68,9 +66,6 @@ public class PlayerCamera : MonoBehaviour
 
             _eulerAngles.x = Mathf.Clamp(_eulerAngles.x, -89f, 89f);
 
-            // Set look delta for how much the player has looked in one frame
-            LookDelta = mouseInput.Look * sensitivity;
-
             // Reset virtual stick when exiting zoom
             lookStick = Vector2.zero;
         }
@@ -78,6 +73,17 @@ public class PlayerCamera : MonoBehaviour
         // ---- FINAL ROTATION ----
 
         transform.eulerAngles = _eulerAngles;
+
+        Vector2 rotDelta = new Vector2
+            (
+                Mathf.DeltaAngle(_lastEulerAngles.x, _eulerAngles.x),
+                Mathf.DeltaAngle(_lastEulerAngles.y, _eulerAngles.y)
+            );
+
+        AngularVelocity = rotDelta / deltaTime;
+
+        Vector2 currentRotation = new Vector2(_eulerAngles.x, _eulerAngles.y);
+        _lastEulerAngles = currentRotation;
 
     }
 

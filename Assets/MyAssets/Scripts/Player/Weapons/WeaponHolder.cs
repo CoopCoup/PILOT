@@ -6,7 +6,8 @@ public struct ActionInput
 {
     public bool Action;
     public bool ActionSustained;
-    public ReadyInputs Ready;
+    public ReadyInputs ReadyEngine;
+
 }
 
 public enum ReadyInputs
@@ -29,7 +30,6 @@ public class WeaponHolder : MonoBehaviour
 
     // Engine variables
     private Animator engineHolderAnimator;
-    private float _currentRoll;
 
     public void Initialise()
     {
@@ -45,7 +45,7 @@ public class WeaponHolder : MonoBehaviour
     {
         _requestedEngineRev = input.Action;
 
-        _requestedDraw = input.Ready switch
+        _requestedDraw = input.ReadyEngine switch
         {
             ReadyInputs.None => _requestedDraw,
             ReadyInputs.Toggle => !_requestedDraw,
@@ -62,14 +62,6 @@ public class WeaponHolder : MonoBehaviour
         {
             engineRevver.RevEngine();
         }
-    }
-
-    public void RollEngine(float cameraRoll, float deltaTime)
-    {
-        //float targetRoll = cameraRoll;
-        //_currentRoll = Mathf.Lerp(_currentRoll, targetRoll, rollSpeed * deltaTime);
-        //transform.localRotation = Quaternion.Euler(0f, 0f, cameraRoll);
-        
     }
 
     public void StowEngine()
