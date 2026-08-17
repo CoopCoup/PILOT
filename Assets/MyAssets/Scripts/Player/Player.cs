@@ -48,6 +48,7 @@ public class Player : MonoBehaviour
 
     [SerializeField] private PlayerCharacterController playerCharacter;
     [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private Interactor interactor;
     [Space]
     [SerializeField] private CameraSpring cameraSpring;
     [SerializeField] private CameraShake cameraShake;
@@ -62,6 +63,7 @@ public class Player : MonoBehaviour
 
     private WeaponEffects _weaponEffects;
     private WeaponID _requestedWeapon = WeaponID.NoChange;
+    private bool _requestLastWeapon = false;
 
     private PlayerState BuildPlayerState()
     {
@@ -106,14 +108,29 @@ public class Player : MonoBehaviour
         playerCamera.UpdateRotation(cameraInput, _playerState.EngineOn, deltaTime);
         weaponSway.UpdateSway(deltaTime, _playerState, playerCamera.AngularVelocity);
 
+        // Update the interactor, and try and interact if the player presses the interact key 
+        interactor.UpdateInteractor(playerCamera.transform);
+        if (input.Interact.WasPressedThisFrame())
+        {
+            interactor.Interact(this);
+        }
+        
+
         // Set unequip requests here before bundling up the weapon inputs to pass to the weapon manager
         if (_playerState.State == CharacterState.Bouncing) // --------------------------------------------------------------ORRRRR anything else that means we wanna unequip our weapon.
         {
             _requestedWeapon = WeaponID.None;
+            _requestLastWeapon = true;
         }
         else
         {
-            _requestedWeapon = WeaponID.NoChange;
+            if (_requestLastWeapon)
+            {
+                _requestedWeapon = WeaponID.LastWeapon;
+                _requestLastWeapon = false;
+            }
+            else _requestedWeapon = WeaponID.NoChange;
+
         }
 
         // Get weapon inputs and update the Weapon Manager
@@ -129,7 +146,7 @@ public class Player : MonoBehaviour
         }; 
         
 
-        // UPDATE WEAPON MANAGER HERE //----------------------------------------------------------------------------------------------------------------------------
+        // Update weapon manager and store currently active weapon effects
         weaponManager.UpdateWeapons(deltaTime, weaponInput);
         _weaponEffects = weaponManager.GetCurrentEffects();
 
@@ -166,5 +183,10 @@ public class Player : MonoBehaviour
         cameraLean.UpdateLean(deltaTime, _playerState, playerCamera.LookStick);
         cameraShake.UpdateShake(deltaTime);
 
+    }
+
+    public void PickupWeapon(WeaponID weaponID)
+    {
+        weaponManager.PickupWeapon(weaponID);
     }
 }

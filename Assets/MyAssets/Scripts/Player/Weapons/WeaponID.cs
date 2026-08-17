@@ -5,5 +5,6 @@ public enum WeaponID
     None,
     FlareGun,
     Engine,
-    NoChange
+    NoChange,
+    LastWeapon
 }

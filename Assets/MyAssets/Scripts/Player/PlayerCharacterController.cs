@@ -773,7 +773,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
                     float impactForce = impactDot * _velocity.magnitude;
 
-                    if (impactDot > minBounceDot && impactForce > zoomCollisionForce && _zoomForce >= 10)
+                    if (impactDot > minBounceDot && impactForce > zoomCollisionForce && _zoomForce >= 1f)
                     {
                         Crash();
                         AddVelocity(-_velocity + (hitNormal * 15f), true);

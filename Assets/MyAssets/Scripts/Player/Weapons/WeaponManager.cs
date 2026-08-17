@@ -14,7 +14,7 @@ public class WeaponManager : MonoBehaviour
    
 
     public readonly Dictionary<WeaponID, WeaponBase> _inventory = new();
-    private WeaponID _lastEquippedID;
+    private WeaponID _lastEquippedID = WeaponID.None;
     private WeaponBase _equippedWeapon;
     private WeaponID _equippedWeaponID = WeaponID.None;
     private WeaponID _requestedWeapon = WeaponID.NoChange;
@@ -35,7 +35,7 @@ public class WeaponManager : MonoBehaviour
     }
     
     // pickup implementation
-    private void PickupWeapon(WeaponID newWeaponID)
+    public void PickupWeapon(WeaponID newWeaponID)
     {
         // Upon picking up a weapon-
         // instantiate it's prefab, make it a child of the WeaponSocket's transform
@@ -45,10 +45,13 @@ public class WeaponManager : MonoBehaviour
         {
             case WeaponID.None: break;
             case WeaponID.Engine:
-                GameObject engineWeapon = Instantiate(enginePrefab, this.transform.position, Quaternion.identity);
-                engineWeapon.transform.SetParent(weaponSocket.transform, false);
-                _inventory.Add(WeaponID.Engine, engineWeapon.GetComponent<EngineWeapon>());
-                _requestedWeapon = WeaponID.Engine;
+                if (!_inventory.ContainsKey(WeaponID.Engine))
+                {
+                    GameObject engineWeapon = Instantiate(enginePrefab, this.transform.position, Quaternion.identity);
+                    engineWeapon.transform.SetParent(weaponSocket.transform, false);
+                    _inventory.Add(WeaponID.Engine, engineWeapon.GetComponent<EngineWeapon>());
+                    _requestedWeapon = WeaponID.Engine;
+                }
                 break;
         }
     }
@@ -62,13 +65,14 @@ public class WeaponManager : MonoBehaviour
 
         // First process any existing equip requests 
         ProcessEquipRequests();
-        
+
         if (_equippedWeapon != null)
         {
             _equippedWeapon.UpdateWeapon(deltaTime, input);
         }
     }
 
+    // Process inputs from the player for the weapons
     private void ProcessInput(WeaponManagerInput input)
     {
         // Take the players requested weapon input FIRST (as this is input for a specific weapon - probably to remove any weapons)
@@ -86,13 +90,16 @@ public class WeaponManager : MonoBehaviour
         // SPECIFIC player requests for a weapon override existing weapon equip requests 
         if (_playerRequestedWeapon != WeaponID.NoChange)
         {
-            _requestedWeapon = _playerRequestedWeapon;
+            // if the player isnt asking to equip the currently equipped weapon, make their request the priority
+            if (_playerRequestedWeapon == _equippedWeaponID)
+            {
+                _requestedWeapon = WeaponID.NoChange;
+            }
+            else _requestedWeapon = _playerRequestedWeapon;
         }
         // If the player has no specific weapon requests and just wants to swap, check that there isn't an existing request first then swap
         else if (_requestedWeapon == WeaponID.NoChange && _requestedWeaponSwap)
         {
-            //if (_equippedWeapon != null)
-           // {
                 switch (_equippedWeaponID)
                 {
                     case WeaponID.Engine:
@@ -112,7 +119,6 @@ public class WeaponManager : MonoBehaviour
                         }
                         break;
                     case WeaponID.None:
-
                         if (_inventory.ContainsKey(WeaponID.Engine))
                         {
                             if (_inventory[WeaponID.Engine] != null) _requestedWeapon = WeaponID.Engine;
@@ -120,7 +126,6 @@ public class WeaponManager : MonoBehaviour
                         break;
 
                 }
-           // }
         }
 
     }
@@ -130,7 +135,11 @@ public class WeaponManager : MonoBehaviour
     {
         // This way of flattening a bunch of if statements basically makes all the undesirable outcomes return
         // so we only reach the end and equip the weapon we've requested if all our checks have been met, like the equipped weapon being the same as the requested weapon
-
+        if (_requestedWeapon == WeaponID.LastWeapon)
+        {
+            _requestedWeapon = _lastEquippedID;
+        }
+        
         if (_requestedWeapon == WeaponID.NoChange)
             return;
 
@@ -169,6 +178,7 @@ public class WeaponManager : MonoBehaviour
 
     private void EquipWeapon(WeaponID newWeaponID)
     {
+
         // If we have a weapon to swap out, set it as the last equipped. If not, set last equipped to None. 
         if (_equippedWeaponID == WeaponID.None)
         {
