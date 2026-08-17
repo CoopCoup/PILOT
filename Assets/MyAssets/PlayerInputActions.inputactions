@@ -60,7 +60,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Ready(Engine)",
+                    "name": "SwapWeapon",
                     "type": "Button",
                     "id": "e180b852-957e-47b1-9990-98bf76bb28ab",
                     "expectedControlType": "",
@@ -183,11 +183,11 @@
                 {
                     "name": "",
                     "id": "6e343e1a-43e0-4197-a425-8a87743707ea",
-                    "path": "<Keyboard>/r",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Ready(Engine)",
+                    "action": "SwapWeapon",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

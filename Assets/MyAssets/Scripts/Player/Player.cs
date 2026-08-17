@@ -4,6 +4,18 @@ using UnityEngine;
 using KinematicCharacterController;
 using System.Linq;
 
+public struct WeaponManagerInput
+{
+    // Which weapon we want equipped at any given point, including 'None' for no weapon equipped
+    public bool SwapWeapon;
+    public WeaponID PlayerRequestedWeapon;
+    
+    public bool ActionPressed;
+    public bool ActionHeld;
+    public bool ReadyPressed;
+    public bool ReadyHeld;
+}
+
 // The player state struct is basically a snapshot of the state of the player - most of this is movement data but it could contain other stuff we need, too!
 // This basically allows us to pass through the information to other classes related to the player without constantly using get methods
 // Its readonly so that no other entitiy can change the fields within - this should just be a snapshot that gets read for info 
@@ -12,10 +24,8 @@ public readonly struct PlayerState
     public CharacterState State { get; }
     public Vector3 Acceleration { get; } 
     public Vector3 LocalVelocity { get; }
-
     public bool EngineOn { get; }
 
-    public float EngineForce { get; }
 
     // This constructor method is how the struct will get formed, by using this we can keep the struct readonly
     public PlayerState
@@ -23,15 +33,13 @@ public readonly struct PlayerState
         CharacterState state,
         Vector3 acceleration,
         Vector3 localVelocity,
-        bool engineOn,
-        float engineForce
+        bool engineOn
         )
     {
         State = state;
         Acceleration = acceleration;
         LocalVelocity = localVelocity;
         EngineOn = engineOn;
-        EngineForce = engineForce;
     }
 }
 
@@ -45,12 +53,15 @@ public class Player : MonoBehaviour
     [SerializeField] private CameraShake cameraShake;
     [SerializeField] private CameraLean cameraLean;
     [Space] 
-    [SerializeField] private WeaponHolder weaponHolder;
+    [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private WeaponSway weaponSway;
 
     private PlayerInputActions _inputActions;
 
     private PlayerState _playerState;
+
+    private WeaponEffects _weaponEffects;
+    private WeaponID _requestedWeapon = WeaponID.NoChange;
 
     private PlayerState BuildPlayerState()
     {
@@ -59,8 +70,7 @@ public class Player : MonoBehaviour
                 playerCharacter._currentState,
                 playerCharacter.GetCharacterAcceleration(),
                 playerCharacter.GetCharacterLocalVelocity(),
-                weaponHolder.GetEngineRevving(),
-                weaponHolder.GetEngineForce()
+                _weaponEffects.EngineOn
             );
     }
 
@@ -75,7 +85,7 @@ public class Player : MonoBehaviour
         playerCamera.Initialise(playerCharacter.GetCameraTarget());
         cameraSpring.Initialise();
 
-        weaponHolder.Initialise();
+        weaponManager.Initialise();
         weaponSway.Initialise();
 
         playerCharacter.OnImpact += cameraShake.AddShake;
@@ -96,28 +106,32 @@ public class Player : MonoBehaviour
         playerCamera.UpdateRotation(cameraInput, _playerState.EngineOn, deltaTime);
         weaponSway.UpdateSway(deltaTime, _playerState, playerCamera.AngularVelocity);
 
-        // Get action input and update the weapon holder
-        var actionInput = new ActionInput
+        // Set unequip requests here before bundling up the weapon inputs to pass to the weapon manager
+        if (_playerState.State == CharacterState.Bouncing) // --------------------------------------------------------------ORRRRR anything else that means we wanna unequip our weapon.
         {
-            // Right Click draws the engine
-            //Left click revs the engine
-            Action = input.Action.WasPressedThisFrame(),
-            ActionSustained = input.Action.IsPressed(),
-            ReadyEngine = input.ReadyEngine.WasPressedThisFrame()
-                    ? ReadyInputs.Toggle
-                    : ReadyInputs.None,
-        };
-
-        if (_playerState.State == CharacterState.Bouncing)
-        {
-            weaponHolder.StowEngine();
+            _requestedWeapon = WeaponID.None;
         }
         else
         {
-            weaponHolder.UpdateInput(actionInput);
+            _requestedWeapon = WeaponID.NoChange;
         }
 
-        weaponHolder.UpdateWeaponHolder(deltaTime);
+        // Get weapon inputs and update the Weapon Manager
+        var weaponInput = new WeaponManagerInput
+        {
+            SwapWeapon = input.SwapWeapon.WasPressedThisFrame(),
+            PlayerRequestedWeapon = _requestedWeapon,
+
+            ActionHeld = input.Action.IsPressed(),
+            ActionPressed = input.Action.WasPressedThisFrame(),
+            ReadyHeld = input.Ready.IsPressed(),
+            ReadyPressed = input.Ready.WasPressedThisFrame(),
+        }; 
+        
+
+        // UPDATE WEAPON MANAGER HERE //----------------------------------------------------------------------------------------------------------------------------
+        weaponManager.UpdateWeapons(deltaTime, weaponInput);
+        _weaponEffects = weaponManager.GetCurrentEffects();
 
         // Get character input and update it
         var characterInput = new CharacterInput
@@ -129,8 +143,8 @@ public class Player : MonoBehaviour
             Crouch = input.Crouch.IsPressed()
                 ? CrouchInput.Crouch
                 : CrouchInput.Uncrouch,
-            Zoom = weaponHolder.GetEngineRevving(),
-            ZoomForce = weaponHolder.GetEngineForce(),
+            Zoom = _playerState.EngineOn, 
+            ZoomForce = _weaponEffects.EngineForce, 
         };
 
         playerCharacter.UpdateInput(characterInput);

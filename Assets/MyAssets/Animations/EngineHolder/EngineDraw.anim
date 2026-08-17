@@ -479,8 +479,15 @@ AnimationClip:
   m_HasGenericRootTransform: 1
   m_HasMotionFloatCurves: 0
   m_Events:
-  - time: 0.4
-    functionName: EnableRevving
+  - time: 0.46666667
+    functionName: OnEngineUseable
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.75
+    functionName: OnEquipAnimFinish
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

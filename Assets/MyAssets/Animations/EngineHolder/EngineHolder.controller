@@ -139,32 +139,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0818a7899174f548b24acf4518c552b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1102 &-1035295834368221192
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: EngineTurnRight
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 334728daf39321545858236a9de55db3, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
 --- !u!114 &-645787527312425840
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -228,19 +202,16 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -1788403672326807334}
-    m_Position: {x: 560, y: 200, z: 0}
+    m_Position: {x: 590, y: 240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6006276479302872337}
     m_Position: {x: 260, y: 100, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -4947307348150255763}
-    m_Position: {x: 260, y: 200, z: 0}
+    m_Position: {x: 250, y: 240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6293553999505062317}
-    m_Position: {x: 560, y: 100, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: -1035295834368221192}
-    m_Position: {x: 595, y: 165, z: 0}
+    m_Position: {x: 590, y: 100, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []

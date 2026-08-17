@@ -614,7 +614,7 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
                 }
             case CharacterState.Zooming:
                 {
-                    // -------------------------------------------- FLYING
+                    // ---------------------------------------------------------------------------------------------------------------------------------------------------------- FLYING
                     
                     motor.ForceUnground(time: 0.1f);
 
@@ -627,8 +627,9 @@ public class PlayerCharacterController : MonoBehaviour, ICharacterController
 
                     var zoomDirection = (_requestedRotation * Vector3.forward).normalized;
                     var targetZoomVelocity = maxZoomSpeed * zoomDirection;
-                    var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, 1f - Mathf.Exp(-_zoomForce * deltaTime));
-                    // Max zoom force is 10f
+                    // OLD WAY OF DOING IT, WE'RE TRYING A NEW ONE WITH SCALAR ZOOM FORCE var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, 1f - Mathf.Exp(-_zoomForce * deltaTime));
+                    var newZoomVelocity = Vector3.Lerp(currentVelocity, targetZoomVelocity, _zoomForce);
+                    // Max zoom force is 10f IN THE OLD VERS
                     // If the zoom force is high enough, allow it to lift the player off the ground
                     
                     currentVelocity = newZoomVelocity;

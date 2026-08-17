@@ -146,7 +146,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Ready(Engine)"",
+                    ""name"": ""SwapWeapon"",
                     ""type"": ""Button"",
                     ""id"": ""e180b852-957e-47b1-9990-98bf76bb28ab"",
                     ""expectedControlType"": """",
@@ -269,11 +269,11 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""6e343e1a-43e0-4197-a425-8a87743707ea"",
-                    ""path"": ""<Keyboard>/r"",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Ready(Engine)"",
+                    ""action"": ""SwapWeapon"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -290,7 +290,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Gameplay_Crouch = m_Gameplay.FindAction("Crouch", throwIfNotFound: true);
         m_Gameplay_Action = m_Gameplay.FindAction("Action", throwIfNotFound: true);
         m_Gameplay_Ready = m_Gameplay.FindAction("Ready", throwIfNotFound: true);
-        m_Gameplay_ReadyEngine = m_Gameplay.FindAction("Ready(Engine)", throwIfNotFound: true);
+        m_Gameplay_SwapWeapon = m_Gameplay.FindAction("SwapWeapon", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -377,7 +377,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Crouch;
     private readonly InputAction m_Gameplay_Action;
     private readonly InputAction m_Gameplay_Ready;
-    private readonly InputAction m_Gameplay_ReadyEngine;
+    private readonly InputAction m_Gameplay_SwapWeapon;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -414,9 +414,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Ready => m_Wrapper.m_Gameplay_Ready;
         /// <summary>
-        /// Provides access to the underlying input action "Gameplay/ReadyEngine".
+        /// Provides access to the underlying input action "Gameplay/SwapWeapon".
         /// </summary>
-        public InputAction @ReadyEngine => m_Wrapper.m_Gameplay_ReadyEngine;
+        public InputAction @SwapWeapon => m_Wrapper.m_Gameplay_SwapWeapon;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -461,9 +461,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Ready.started += instance.OnReady;
             @Ready.performed += instance.OnReady;
             @Ready.canceled += instance.OnReady;
-            @ReadyEngine.started += instance.OnReadyEngine;
-            @ReadyEngine.performed += instance.OnReadyEngine;
-            @ReadyEngine.canceled += instance.OnReadyEngine;
+            @SwapWeapon.started += instance.OnSwapWeapon;
+            @SwapWeapon.performed += instance.OnSwapWeapon;
+            @SwapWeapon.canceled += instance.OnSwapWeapon;
         }
 
         /// <summary>
@@ -493,9 +493,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Ready.started -= instance.OnReady;
             @Ready.performed -= instance.OnReady;
             @Ready.canceled -= instance.OnReady;
-            @ReadyEngine.started -= instance.OnReadyEngine;
-            @ReadyEngine.performed -= instance.OnReadyEngine;
-            @ReadyEngine.canceled -= instance.OnReadyEngine;
+            @SwapWeapon.started -= instance.OnSwapWeapon;
+            @SwapWeapon.performed -= instance.OnSwapWeapon;
+            @SwapWeapon.canceled -= instance.OnSwapWeapon;
         }
 
         /// <summary>
@@ -579,11 +579,11 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnReady(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Ready(Engine)" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "SwapWeapon" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnReadyEngine(InputAction.CallbackContext context);
+        void OnSwapWeapon(InputAction.CallbackContext context);
     }
 }

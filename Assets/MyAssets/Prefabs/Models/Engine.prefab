@@ -561,7 +561,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2045822065938412469}
-  - component: {fileID: 4883926744085164258}
   - component: {fileID: 2716628326601523278}
   m_Layer: 0
   m_Name: Engine
@@ -589,20 +588,6 @@ Transform:
   - {fileID: 1315782605519745360}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4883926744085164258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4381169086747183238}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4128bdf3488d4d6438eaa1dcd672997a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RipCord: {fileID: 1635521038032576708}
-  RevUpSpeed: 15
 --- !u!95 &2716628326601523278
 Animator:
   serializedVersion: 7
