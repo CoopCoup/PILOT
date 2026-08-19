@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class EnginePickup : MonoBehaviour, IInteractable
 {
-    public bool CanInteract(Player player)
+    [SerializeField] Transform uiHandle;
+    
+    public bool CanInteract()
     {
         return true;
     }
@@ -15,4 +17,5 @@ public class EnginePickup : MonoBehaviour, IInteractable
         Destroy(gameObject);
     }
 
+    public Transform GetUIHandle() => uiHandle;
 }

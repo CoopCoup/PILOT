@@ -48,6 +48,7 @@ public class Player : MonoBehaviour
 
     [SerializeField] private PlayerCharacterController playerCharacter;
     [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private Camera actualCamera;
     [SerializeField] private Interactor interactor;
     [Space]
     [SerializeField] private CameraSpring cameraSpring;
@@ -109,7 +110,7 @@ public class Player : MonoBehaviour
         weaponSway.UpdateSway(deltaTime, _playerState, playerCamera.AngularVelocity);
 
         // Update the interactor, and try and interact if the player presses the interact key 
-        interactor.UpdateInteractor(playerCamera.transform);
+        interactor.UpdateInteractor(actualCamera);
         if (input.Interact.WasPressedThisFrame())
         {
             interactor.Interact(this);
@@ -176,7 +177,6 @@ public class Player : MonoBehaviour
     {
         var deltaTime = Time.deltaTime;
         var cameraTarget = playerCharacter.GetCameraTarget();
-
 
         playerCamera.UpdatePosition(cameraTarget);
         cameraSpring.UpdateSpring(deltaTime, _playerState, cameraTarget.up);
