@@ -8,11 +8,16 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
+<<<<<<< Updated upstream
   - 
   - 
+=======
+  - Interactable
+  - Player Projectiles
+>>>>>>> Stashed changes
   - 
   - 
   - 
